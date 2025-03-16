@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { ActionIcon, Button, Card, Group, JsonInput, Menu, Stack, TextInput, Title, Modal, Select, Tooltip } from '@mantine/core';
-import { IconFileDescriptionFilled, IconHelpCircle, IconTrash } from '@tabler/icons-react';
+import { ActionIcon, Button, Card, Group, JsonInput, Menu, Stack, TextInput, Title, Modal, Select, Tooltip, Collapse } from '@mantine/core';
+import { IconChevronDown, IconChevronUp, IconFileDescriptionFilled, IconHelpCircle, IconTrash } from '@tabler/icons-react';
 import { useClickOutside } from '@mantine/hooks';
 
 export default function ColumnSelectorNode({ data, isConnectable }) {
      const [helpModalOpen, setHelpModalOpen] = useState(false);
+     const [nodeOpen, setNodeOpen] = useState(true);
   const [jsonExport, setJsonExport] = useState(null);
   const [nodeData, setNodeData] = useState({
     mappingId: data.mappingId || '',
@@ -30,9 +31,13 @@ export default function ColumnSelectorNode({ data, isConnectable }) {
     setNodeData((prev) => ({ ...prev, description: value }));
   }, []);
 
-  const removeNode = useCallback(() => {
-    console.log('Node removed');
-  }, []);
+ const removeNode = useCallback(() => {
+       if (data.deleteNode) {
+         data.deleteNode(); 
+       } else {
+         console.error("deleteNode function not found in data");
+       }
+     }, [data]);
 
   const exportJson = () => {
     const json = JSON.stringify(nodeData, null, 2);
@@ -79,9 +84,15 @@ const menuRef = useClickOutside(() => setHelpModalOpen(false));
                   />
                 </Menu.Dropdown>
               </Menu>
+              <ActionIcon
+                    onClick={() => setNodeOpen(!nodeOpen)}
+                    style={{ marginLeft: '10px' }}
+                  >
+                    {nodeOpen ? <IconChevronUp /> : <IconChevronDown />}
+                  </ActionIcon>
             </Group>
           </Group>
-
+<Collapse in={nodeOpen}>
           <Stack bg="var(--mantine-color-body)" align="stretch" justify="start" gap="md">
             <Group justify="space-between">
               <div>Mapping ID</div>
@@ -131,6 +142,7 @@ const menuRef = useClickOutside(() => setHelpModalOpen(false));
               </div>
             )}
           </Stack>
+          </Collapse>
         </Stack>
       </Card>
       <Handle

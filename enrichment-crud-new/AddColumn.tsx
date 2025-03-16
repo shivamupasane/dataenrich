@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { ActionIcon, Button, Card, Group, Stack, TextInput, Title, NumberInput, Divider, Collapse, Modal, Menu, Textarea } from '@mantine/core';
 import { IconTrash, IconChevronDown, IconChevronUp, IconHelpCircle, IconFileDescription } from '@tabler/icons-react';
 
-export default function AddColumnNode({ data, isConnectable, onDeleteNode }) {
+export default function AddColumnNode({ data, isConnectable }) {
+  const [nodeOpen, setNodeOpen] = useState(true);
   const [columns, setColumns] = useState([
     {
       mappingId: '',
@@ -69,11 +70,13 @@ export default function AddColumnNode({ data, isConnectable, onDeleteNode }) {
     link.click(); // Trigger the download
   };
 
-  const handleDeleteNode = () => {
-    if (onDeleteNode) {
-      onDeleteNode(); // Trigger the delete action passed via props
-    }
-  };
+  const handleDeleteNode = useCallback(() => {
+         if (data.deleteNode) {
+           data.deleteNode(); 
+         } else {
+           console.error("deleteNode function not found in data");
+         }
+       }, [data]);
 
   return (
     <>
@@ -124,9 +127,16 @@ export default function AddColumnNode({ data, isConnectable, onDeleteNode }) {
               >
                 <IconTrash />
               </ActionIcon>
+               <ActionIcon
+                                  onClick={() => setNodeOpen(!nodeOpen)}
+                                  style={{ marginLeft: '10px' }}
+                                >
+                                  {nodeOpen ? <IconChevronUp /> : <IconChevronDown />}
+                                </ActionIcon>
             </Group>
           </Group>
 
+          <Collapse in={nodeOpen}>
           {columns.map((column, index) => (
             <Card key={index} shadow="sm" withBorder radius="md" padding="sm">
               <Group position="apart">
@@ -246,6 +256,7 @@ export default function AddColumnNode({ data, isConnectable, onDeleteNode }) {
           <Button onClick={exportToJson} variant="outline" color="green" style={{ marginTop: '20px' }}>
             Export JSON
           </Button>
+          </Collapse>
         </Stack>
       </Card>
 

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { ActionIcon, Card, Group, JsonInput, Menu, Select, Stack, TextInput, Title, Modal, Button } from '@mantine/core';
-import { IconFileDescriptionFilled, IconHelpCircle, IconTrash } from '@tabler/icons-react';
+import { ActionIcon, Card, Group, JsonInput, Menu, Select, Stack, TextInput, Title, Modal, Button, Collapse } from '@mantine/core';
+import { IconChevronDown, IconChevronUp, IconFileDescriptionFilled, IconHelpCircle, IconTrash } from '@tabler/icons-react';
 import { useClickOutside } from '@mantine/hooks';
 
 export const mappingSource = {
@@ -18,7 +18,7 @@ export const mappingSource = {
 
 export default function DataTargetNode ({ data, isConnectable, set, get, nodeId }){
   const [helpModalOpen, setHelpModalOpen] = useState(false);
-
+  const [nodeOpen, setNodeOpen] = useState(true);
   const [displayName, setDisplayNameState] = useState(data.displayName ?? "");
   const [filterCommands, setFilterCommandsState] = useState(data.filterCommands ?? "");
   const [description, setDescriptionState] = useState(data.description ?? ""); // Safe initialization
@@ -49,13 +49,12 @@ export default function DataTargetNode ({ data, isConnectable, set, get, nodeId 
   }, [data]);
 
   const removeNode = useCallback(() => {
-    set({
-      edges: get().edges.filter(({ source, target }) => source !== nodeId && target !== nodeId),
-    });
-    set({
-      nodes: get().nodes.filter((node) => node.id !== nodeId),
-    });
-  }, [get, nodeId, set]);
+      if (data.deleteNode) {
+        data.deleteNode(); 
+      } else {
+        console.error("deleteNode function not found in data");
+      }
+    }, [data]);
 
   const handleExportJson = useCallback(() => {
     const exportedData = {
@@ -107,9 +106,16 @@ export default function DataTargetNode ({ data, isConnectable, set, get, nodeId 
                   />
                 </Menu.Dropdown>
               </Menu>
+              <ActionIcon
+                    onClick={() => setNodeOpen(!nodeOpen)}
+                    style={{ marginLeft: '10px' }}
+                  >
+                    {nodeOpen ? <IconChevronUp /> : <IconChevronDown />}
+                  </ActionIcon>
             </Group>
           </Group>
 
+          <Collapse in={nodeOpen}>
           <Stack bg="var(--mantine-color-body)" align="stretch" justify="start" gap="md">
             <Group justify="space-between">
               <div>Select Mapping ID</div>
@@ -155,6 +161,7 @@ export default function DataTargetNode ({ data, isConnectable, set, get, nodeId 
               <Button onClick={handleExportJson}>Export JSON</Button>
             </Group>
           </Stack>
+          </Collapse>
         </Stack>
       </Card>
 

@@ -1,13 +1,13 @@
 import React, { useState, useCallback } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { ActionIcon, Button, Card, Group, JsonInput, Menu, Stack, TextInput, Title } from '@mantine/core';
-import { IconFileDescriptionFilled, IconHelpCircle, IconTrash, IconSql } from '@tabler/icons-react';
+import { ActionIcon, Button, Card, Group, JsonInput, Menu, Stack, TextInput, Title,Collapse } from '@mantine/core';
+import { IconFileDescriptionFilled, IconHelpCircle, IconTrash, IconSql, IconChevronUp, IconChevronDown } from '@tabler/icons-react';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-sql';
 import 'ace-builds/src-noconflict/theme-github';
 
 export default function FilterNode({ data = {}, isConnectable }) {
-  // ✅ Initialize filter properties with default values
+  const [nodeOpen, setNodeOpen] = useState(true);
   const [filter, setFilter] = useState({
     filterName: data.filterName || "",
     displayName: data.displayName || "",
@@ -46,8 +46,12 @@ export default function FilterNode({ data = {}, isConnectable }) {
   }, []);
 
   const removeNode = useCallback(() => {
-    console.log("Node removed");
-  }, []);
+      if (data.deleteNode) {
+        data.deleteNode(); 
+      } else {
+        console.error("deleteNode function not found in data");
+      }
+    }, [data]);
 
   const exportJson = () => {
     const json = JSON.stringify(filter, null, 2);
@@ -91,9 +95,15 @@ export default function FilterNode({ data = {}, isConnectable }) {
                   />
                 </Menu.Dropdown>
               </Menu>
+              <ActionIcon
+                    onClick={() => setNodeOpen(!nodeOpen)}
+                    style={{ marginLeft: '10px' }}
+                  >
+                    {nodeOpen ? <IconChevronUp /> : <IconChevronDown />}
+                  </ActionIcon>
             </Group>
           </Group>
-
+ <Collapse in={nodeOpen}>
           <Stack bg="var(--mantine-color-body)" align="stretch" justify="start" gap="md">
             <Group justify="space-between">
               <div>Filter Name</div>
@@ -141,6 +151,7 @@ export default function FilterNode({ data = {}, isConnectable }) {
               Export JSON
             </Button>
           </Stack>
+          </Collapse>
         </Stack>
       </Card>
       <Handle type="source" position={Position.Right} id="a" isConnectable={isConnectable} />
