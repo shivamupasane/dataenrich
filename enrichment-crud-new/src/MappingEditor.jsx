@@ -167,6 +167,7 @@ const DnDFlow = () => {
   const onDrop = useCallback(
     (event) => {
       event.preventDefault();
+      console.log("type", type)
       if (!type) return;
 
       const position = screenToFlowPosition({
